@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.interview.mapper.QuestionMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="QuestionResultMap" type="com.interview.entity.Question">
+        <id property="questionId" column="QuestionId"/>
+        <result property="topicId" column="TopicId"/>
+        <result property="title" column="Title"/>
+        <result property="contentMd" column="ContentMd"/>
+        <result property="answerMd" column="AnswerMd"/>
+        <result property="difficulty" column="Difficulty"/>
+        <result property="sortOrder" column="SortOrder"/>
+        <result property="createdBy" column="CreatedBy"/>
+        <result property="createdAt" column="CreatedAt"/>
+        <result property="updatedAt" column="UpdatedAt"/>
+        <result property="isActive" column="IsActive"/>
+        <result property="isPremium" column="IsPremium"/>
+        <result property="viewCount" column="ViewCount"/>
+    </resultMap>
+
+    <!-- 根据考点ID查询题目列表（分页） -->
+    <select id="selectQuestionsByTopicId" resultMap="QuestionResultMap">
+        SELECT *
+        FROM Questions
+        WHERE TopicId = #{topicId} AND IsActive = 1
+        ORDER BY SortOrder, QuestionId
+    </select>
+
+</mapper>
