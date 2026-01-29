@@ -60,6 +60,6 @@ web-build/
 /.expo/
 
 # Env files
-./.env
+/.env
 .env.local
 .env.production

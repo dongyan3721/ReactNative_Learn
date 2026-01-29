@@ -1,39 +1,54 @@
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import {Home, Star, User} from "lucide-react-native";
 
 export default function TabsLayout() {
     return (
         <Tabs
             screenOptions={{
-                headerShown: false,
-                // tabBarActiveTintColor: '#007AFF',
-                // tabBarInactiveTintColor: '#999',
-                // tabBarStyle: {
-                //     backgroundColor: '#fff',
-                //     borderTopWidth: 1,
-                //     borderTopColor: '#e0e0e0',
-                // },
+                headerShown: true,
+                tabBarActiveTintColor: '#1C64F2',
+                tabBarInactiveTintColor: '#9CA3AF',
+                tabBarStyle: {
+                    backgroundColor: '#FFFFFF',
+                    borderTopWidth: 1,
+                    borderTopColor: '#E5E7EB',
+                    height: 60,
+                    paddingBottom: 8,
+                    paddingTop: 8,
+                },
+                headerStyle: {
+                    backgroundColor: '#FFFFFF',
+                    elevation: 0,
+                    shadowOpacity: 0,
+                    borderBottomWidth: 1,
+                    borderBottomColor: '#E5E7EB',
+                },
+                headerTintColor: '#111827',
+                headerTitleStyle: {
+                    fontWeight: '600',
+                    fontSize: 18,
+                },
             }}
         >
             <Tabs.Screen
                 name="index"
                 options={{
                     title: '首页',
-                    tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>🏠</Text>
-                }}
-            />
-            <Tabs.Screen
-                name="profile"
-                options={{
-                    title: '个人中心',
-                    tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>👤</Text>,
+                    tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
                 }}
             />
             <Tabs.Screen
                 name="favorites"
                 options={{
-                    title: '我的收藏',
-                    tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>⭐</Text>,
+                    title: '收藏',
+                    tabBarIcon: ({ color, size }) => <Star color={color} size={size} />,
+                }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: '我的',
+                    tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
                 }}
             />
         </Tabs>
