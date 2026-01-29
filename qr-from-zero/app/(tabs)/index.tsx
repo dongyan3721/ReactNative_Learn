@@ -30,8 +30,6 @@ export default function HomeScreen() {
       const response = await positionApi.getCurrentUserPositions();
       setPositions(response.data);
     } catch (error) {
-      console.log(111111)
-      console.log(segments[0])
       if (segments[0] == '(tabs)') Alert.alert('错误', '加载职位列表失败');
     } finally {
       setIsLoading(false);
