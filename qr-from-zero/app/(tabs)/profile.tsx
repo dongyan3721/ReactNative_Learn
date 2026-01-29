@@ -14,6 +14,7 @@ export default function ProfileScreen() {
     const {logout, user} = useAuth();
 
     const handleLogout = () => {
+        // 这个东西不适配web端
         Alert.alert('退出登录', '确定要退出吗？', [
             {text: '取消', style: 'cancel'},
             {

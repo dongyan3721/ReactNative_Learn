@@ -8,7 +8,7 @@ export default function NotFoundScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>404</Text>
         <Text style={styles.subtitle}>页面未找到</Text>
-        <Link href="/(tabs)/index" style={styles.link}>
+        <Link href="/(tabs)" style={styles.link}>
           <Text style={styles.linkText}>返回首页</Text>
         </Link>
       </View>
