@@ -2,7 +2,7 @@ import React, {createContext, useContext, useState, useEffect, ReactNode} from '
 import {useRouter, useSegments} from 'expo-router';
 import authStorage from '@/utils/auth';
 import {authApi, LoginRequest, RegisterRequest} from "@/api/auth";
-import {User} from "@/types"; 
+import {User} from "@/types";
 
 interface AuthContextType {
   token: string | null;
@@ -77,18 +77,14 @@ export function AuthProvider({children}: AuthProviderProps) {
   }, [token, segments, isLoading]);
 
   const login = async (data: LoginRequest) => {
-    try {
-      setIsLoading(true);
-      const res = await authApi.login(data);
-      setToken(res.data.token);
-      setUser(res.data.user);
-      await authStorage.setToken(res.data.token);
-      await authStorage.setUser(res.data.user);
-      setIsLoading(false);
-      router.replace('/(tabs)');
-    } catch (error) {
-      throw error;
-    }
+    setIsLoading(true);
+    const res = await authApi.login(data);
+    setToken(res.data.token);
+    setUser(res.data.user);
+    await authStorage.setToken(res.data.token);
+    await authStorage.setUser(res.data.user);
+    setIsLoading(false);
+    router.replace('/(tabs)');
   };
 
   const logout = async () => {
@@ -103,18 +99,14 @@ export function AuthProvider({children}: AuthProviderProps) {
   };
 
   const register = async (data: RegisterRequest) => {
-    try {
-      setIsLoading(true);
-      const res = await authApi.register(data);
-      setToken(res.data.token);
-      setUser(res.data.user);
-      await authStorage.setToken(res.data.token);
-      await authStorage.setUser(res.data.user);
-      setIsLoading(false);
-      router.replace('/(tabs)');
-    } catch (error) {
-      throw error;
-    }
+    setIsLoading(true);
+    const res = await authApi.register(data);
+    setToken(res.data.token);
+    setUser(res.data.user);
+    await authStorage.setToken(res.data.token);
+    await authStorage.setUser(res.data.user);
+    setIsLoading(false);
+    router.replace('/(tabs)');
   }
 
   return (

@@ -1,7 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import {useRouter} from "expo-router";
-// import {Alert} from "react-native";
+import {HttpCode} from "@/api/httpcode";
+import {useRouter} from "expo-router";
+import {Alert} from "react-native";
 
 const API_BASE_URL = "http://192.168.2.24:8080/api/v1"
 
@@ -31,10 +32,16 @@ apiClient.interceptors.request.use(
 // 响应拦截器 - 处理错误
 apiClient.interceptors.response.use(
     (response) => {
-        return response.data;
+
+        if (response.data.code == HttpCode.SUCCESS){
+            return response.data;
+        }
+
+        return Promise.reject(response.data.message);
+
     },
     async (error) => {
-        if (error.response?.status === 401) {
+        if (error.response?.status === HttpCode.UNAUTHORIZED) {
             // Token过期，清除本地存储并跳转到登录
             await AsyncStorage.removeItem('token');
             await AsyncStorage.removeItem('user');
@@ -42,6 +49,7 @@ apiClient.interceptors.response.use(
 
 
         }
+
         return Promise.reject(error);
     }
 );

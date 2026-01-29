@@ -8,7 +8,7 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import {useRouter, useSegments} from 'expo-router';
 import { positionApi } from '@/api/position';
 import { PositionBubble } from '@/components/PositionBubble';
 import { Position } from '@/types';
@@ -19,6 +19,8 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  const segments = useSegments();
+
   useEffect(() => {
     loadPositions();
   }, []);
@@ -28,7 +30,9 @@ export default function HomeScreen() {
       const response = await positionApi.getCurrentUserPositions();
       setPositions(response.data);
     } catch (error) {
-      Alert.alert('错误', '加载职位列表失败');
+      console.log(111111)
+      console.log(segments[0])
+      if (segments[0] == '(tabs)') Alert.alert('错误', '加载职位列表失败');
     } finally {
       setIsLoading(false);
       setRefreshing(false);

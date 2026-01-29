@@ -66,7 +66,6 @@ export default function RegisterScreen() {
                     categoryId: selectedCategoryId,
                 }
             )
-            // 注册成功后，_layout.tsx会自动跳转
         } catch (err: any) {
             Alert.alert('注册失败', err);
         }
