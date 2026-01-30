@@ -1,175 +1,81 @@
-import React from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    Modal,
-    FlatList,
-    Dimensions,
-} from 'react-native';
-import { AnswerCardItem } from '@/types';
+import React from "react";
+import {Modal, ModalBackdrop, ModalBody, ModalCloseButton, ModalContent, ModalHeader} from "@/components/ui/modal";
+import {X} from "lucide-react-native";
+import {Heading} from "@/components/ui/heading";
+import {HStack} from "@/components/ui/hstack";
+import {Pressable} from "@/components/ui/pressable";
+import {Box} from "@/components/ui/box";
+import {Text} from "@/components/ui/text";
+import {Divider} from "@/components/ui/divider";
+import {AnswerCardItem} from "@/types";
 
-const { width, height } = Dimensions.get('window');
-
-interface Props {
+interface Props  {
     visible: boolean;
     answerCard: AnswerCardItem[];
     currentIndex: number;
-    onClose: () => void;
-    onSelectQuestion: (index: number) => void;
+    onCloseAnswerSheet: (visible: boolean) => void;
+    onPressQuestionOrder: (currentIndex: number, visible: boolean) => void;
 }
 
-export const AnswerSheet: React.FC<Props> = ({
-                                                 visible,
-                                                 answerCard,
-                                                 currentIndex,
-                                                 onClose,
-                                                 onSelectQuestion,
-                                             }) => {
-    const renderItem = ({ item, index }: { item: AnswerCardItem; index: number }) => {
-        const isActive = index === currentIndex;
-        const isViewed = item.isViewed;
 
-        return (
-            <TouchableOpacity
-                style={[
-                    styles.answerItem,
-                    isActive && styles.activeItem,
-                    isViewed && styles.viewedItem,
-                ]}
-                onPress={() => {
-                    onSelectQuestion(index);
-                    onClose();
-                }}
-            >
-                <Text style={[styles.answerNumber, isActive && styles.activeText]}>
-                    {index + 1}
-                </Text>
-            </TouchableOpacity>
-        );
-    };
+export const  AnswerSheet : React.FC<Props> = ({
+    visible, answerCard, currentIndex, onCloseAnswerSheet, onPressQuestionOrder
+                                                })=>{
+
 
     return (
-        <Modal
-            visible={visible}
-            transparent
-            animationType="slide"
-            onRequestClose={onClose}
-        >
-            <View style={styles.modalContainer}>
-                <View style={styles.modalContent}>
-                    <View style={styles.header}>
-                        <Text style={styles.headerTitle}>答题卡</Text>
-                        <TouchableOpacity onPress={onClose}>
-                            <Text style={styles.closeButton}>关闭</Text>
-                        </TouchableOpacity>
-                    </View>
+        <Modal isOpen={visible} onClose={()=>{onCloseAnswerSheet(false)}}>
+            <ModalBackdrop />
+            <ModalContent className="max-h-full">
+                <ModalHeader>
+                    <Heading size="lg">答题卡</Heading>
+                    <ModalCloseButton>
+                        <X size={24} />
+                    </ModalCloseButton>
+                </ModalHeader>
+                <ModalBody>
+                    <HStack className="flex-wrap gap-2 p-2">
+                        {answerCard.map((item, idx) => (
+                            <Pressable
+                                key={item.questionId}
+                                onPress={()=>{onPressQuestionOrder(idx, false)}}
+                            >
+                                <Box className="w-12 h-12 rounded justify-center items-center"
+                                     style={{
+                                         backgroundColor: idx === currentIndex ? '#1A56DB' : item.isViewed ? '#86EFAC' : '#9CA3AF'
+                                     }}
+                                >
+                                    <Text className="font-bold"
+                                          style={{
+                                              backgroundColor: idx === currentIndex ? '#FFFFFF' : '#374151',
+                                          }}
+                                    >
+                                        {idx + 1}
+                                    </Text>
+                                </Box>
+                            </Pressable>
+                        ))}
+                    </HStack>
 
-                    <View style={styles.legend}>
-                        <View style={styles.legendItem}>
-                            <View style={[styles.legendDot, styles.viewedItem]} />
-                            <Text style={styles.legendText}>已浏览</Text>
-                        </View>
-                        <View style={styles.legendItem}>
-                            <View style={[styles.legendDot, styles.activeItem]} />
-                            <Text style={styles.legendText}>当前题</Text>
-                        </View>
-                        <View style={styles.legendItem}>
-                            <View style={styles.legendDot} />
-                            <Text style={styles.legendText}>未浏览</Text>
-                        </View>
-                    </View>
+                    <Divider className="my-4" />
 
-                    <FlatList
-                        data={answerCard}
-                        renderItem={renderItem}
-                        keyExtractor={(item) => item.questionId.toString()}
-                        numColumns={5}
-                        contentContainerStyle={styles.gridContainer}
-                    />
-                </View>
-            </View>
+                    <HStack className="justify-center mb-4">
+                        <HStack className="items-center" space="xs">
+                            <Box className="w-4 h-4 rounded-s bg-green-300"/>
+                            <Text size="sm">已浏览</Text>
+                        </HStack>
+                        <HStack space="xs" className="items-center">
+                            <Box className="w-4 h-4 rounded-s bg-gray-700"/>
+                            <Text size="sm">当前题</Text>
+                        </HStack>
+                        <HStack space="xs" className="items-center">
+                            <Box className="w-4 h-4 rounded-s bg-orange-200"/>
+                            <Text size="sm">未浏览</Text>
+                        </HStack>
+                    </HStack>
+                </ModalBody>
+            </ModalContent>
         </Modal>
-    );
-};
+    )
 
-const styles = StyleSheet.create({
-    modalContainer: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'flex-end',
-    },
-    modalContent: {
-        backgroundColor: '#fff',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        maxHeight: height * 0.7,
-        paddingBottom: 20,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#E0E0E0',
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#1a1a1a',
-    },
-    closeButton: {
-        fontSize: 16,
-        color: '#007AFF',
-        fontWeight: '500',
-    },
-    legend: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        padding: 16,
-        backgroundColor: '#F8F8F8',
-    },
-    legendItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    legendDot: {
-        width: 20,
-        height: 20,
-        borderRadius: 4,
-        backgroundColor: '#E0E0E0',
-        marginRight: 6,
-    },
-    legendText: {
-        fontSize: 13,
-        color: '#666',
-    },
-    gridContainer: {
-        padding: 20,
-    },
-    answerItem: {
-        width: (width - 80) / 5,
-        height: 50,
-        margin: 5,
-        backgroundColor: '#E0E0E0',
-        borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    viewedItem: {
-        backgroundColor: '#C8E6C9',
-    },
-    activeItem: {
-        backgroundColor: '#007AFF',
-    },
-    answerNumber: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#666',
-    },
-    activeText: {
-        color: '#fff',
-    },
-});
+}

@@ -1,28 +1,29 @@
 // @ts-ignore
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef, useReducer} from 'react';
 import {
     ScrollView,
     Animated
 } from 'react-native';
-import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { questionApi } from '@/api/question';
-import { MarkdownViewer } from '@/components/MarkdownViewer';
-import { AnswerSheet } from '@/components/AnswerSheet';
-import { Question, AnswerCardItem } from '@/types';
-import {Toast, ToastTitle, useToast } from "@/components/ui/toast";
-import { Center } from "@/components/ui/center";
-import { Spinner } from "@/components/ui/spinner";
-import { Text } from "@/components/ui/text";
-import { HStack } from "@/components/ui/hstack";
-import { Pressable } from "@/components/ui/pressable";
-import {ChevronLeft, ChevronRight, Grid3x3, Star, X} from "lucide-react-native";
-import { Box } from "@/components/ui/box";
+import {useLocalSearchParams, useRouter, Stack} from 'expo-router';
+import {Gesture, GestureDetector} from 'react-native-gesture-handler';
+import {questionApi} from '@/api/question';
+import {MarkdownViewer} from '@/components/MarkdownViewer';
+import {Question, AnswerCardItem} from '@/types';
+import {Toast, ToastTitle, useToast} from "@/components/ui/toast";
+import {Center} from "@/components/ui/center";
+import {Spinner} from "@/components/ui/spinner";
+import {Text} from "@/components/ui/text";
+import {HStack} from "@/components/ui/hstack";
+import {Pressable} from "@/components/ui/pressable";
+import {ChevronLeft, ChevronRight, Grid3x3, Star} from "lucide-react-native";
+import {Box} from "@/components/ui/box";
 import {Badge, BadgeText} from "@/components/ui/badge";
 import {Heading} from "@/components/ui/heading";
 import {Button, ButtonText} from "@/components/ui/button";
-import {Modal, ModalBackdrop, ModalBody, ModalCloseButton, ModalContent, ModalHeader} from "@/components/ui/modal";
-import {Divider} from "@/components/ui/divider";
+import {AnswerSheet} from "@/components/AnswerSheet";
+import {
+    ANSWER_SHEET_ACTION, answerSheetInitialState, answerSheetReducer,
+} from "@/state/question/useShowCloseAnswerSheetReduceStateKidding";
 
 const DIFFICULTY_COLORS = {
     Easy: 'success',
@@ -31,18 +32,17 @@ const DIFFICULTY_COLORS = {
 };
 
 export default function QuestionDetailScreen() {
-    const { topicId, index } = useLocalSearchParams<{
+    const {topicId, index} = useLocalSearchParams<{
         topicId: string;
         index: string;
     }>();
-
+    const [answerSheetState, answerSheetDispatch] = useReducer(answerSheetReducer, answerSheetInitialState);
     const router = useRouter();
     const toast = useToast();
     const [questions, setQuestions] = useState<Question[]>([]);
     const [currentIndex, setCurrentIndex] = useState(Number(index) || 0);
     const [showAnswer, setShowAnswer] = useState(false);
     const [answerCard, setAnswerCard] = useState<AnswerCardItem[]>([]);
-    const [showAnswerSheet, setShowAnswerSheet] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
     const scrollViewRef = useRef<ScrollView>(null);
@@ -57,7 +57,7 @@ export default function QuestionDetailScreen() {
 
     useEffect(() => {
         setShowAnswer(false);
-        scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        scrollViewRef.current?.scrollTo({y: 0, animated: false});
     }, [currentIndex]);
 
     const loadQuestions = async () => {
@@ -67,7 +67,7 @@ export default function QuestionDetailScreen() {
         } catch (error) {
             toast.show({
                 placement: 'top',
-                render: ({ id }) => (
+                render: ({id}) => (
                     <Toast nativeID={id} action="error" variant="solid">
                         <ToastTitle>加载题目失败</ToastTitle>
                     </Toast>
@@ -103,7 +103,7 @@ export default function QuestionDetailScreen() {
 
             toast.show({
                 placement: 'top',
-                render: ({ id }) => (
+                render: ({id}) => (
                     <Toast nativeID={id} action="success" variant="solid">
                         <ToastTitle>{response.data.message}</ToastTitle>
                     </Toast>
@@ -112,7 +112,7 @@ export default function QuestionDetailScreen() {
         } catch (error) {
             toast.show({
                 placement: 'top',
-                render: ({ id }) => (
+                render: ({id}) => (
                     <Toast nativeID={id} action="error" variant="solid">
                         <ToastTitle>操作失败</ToastTitle>
                     </Toast>
@@ -161,7 +161,7 @@ export default function QuestionDetailScreen() {
     if (isLoading) {
         return (
             <Center className="flex-1 bg-white dark:bg-gray-900">
-                <Spinner size="large" />
+                <Spinner size="large"/>
             </Center>
         );
     }
@@ -189,8 +189,10 @@ export default function QuestionDetailScreen() {
                                     color={currentQuestion.isFavorited ? '#FFD700' : '#6B7280'}
                                 />
                             </Pressable>
-                            <Pressable onPress={() => setShowAnswerSheet(true)}>
-                                <Grid3x3 size={24} color="#6B7280" />
+                            <Pressable onPress={() => {
+                                answerSheetDispatch({type: ANSWER_SHEET_ACTION.OPEN_ANSWER_SHEET})
+                            }}>
+                                <Grid3x3 size={24} color="#6B7280"/>
                             </Pressable>
                         </HStack>
                     ),
@@ -199,10 +201,10 @@ export default function QuestionDetailScreen() {
 
             <Box className="flex-1 bg-white dark:bg-gray-900">
                 <GestureDetector gesture={panGesture}>
-                    <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+                    <Animated.View style={{flex: 1, opacity: fadeAnim}}>
                         <ScrollView
                             ref={scrollViewRef}
-                            contentContainerStyle={{ paddingBottom: 80 }}
+                            contentContainerStyle={{paddingBottom: 80}}
                         >
                             {/* 题目头部 */}
                             <Box className="bg-white dark:bg-gray-900 p-4 mb-2">
@@ -245,7 +247,7 @@ export default function QuestionDetailScreen() {
                                 disabled={showAnswer}
                             >
                                 <Box className="bg-white dark:bg-gray-900 p-4 mb-2">
-                                    <MarkdownViewer content={currentQuestion.contentMd} />
+                                    <MarkdownViewer content={currentQuestion.contentMd}/>
 
                                     {!showAnswer && (
                                         <Center className="mt-6 py-4">
@@ -266,7 +268,7 @@ export default function QuestionDetailScreen() {
                                         </Text>
                                     </Box>
                                     <Box className="p-4">
-                                        <MarkdownViewer content={currentQuestion.answerMd} />
+                                        <MarkdownViewer content={currentQuestion.answerMd}/>
                                     </Box>
                                 </Box>
                             )}
@@ -275,7 +277,8 @@ export default function QuestionDetailScreen() {
                 </GestureDetector>
 
                 {/* 底部导航栏 */}
-                <Box className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t-2 border-t-gray-800 dark:border-t-gray-200 p-4 pb-6">
+                <Box
+                    className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t-2 border-t-gray-800 dark:border-t-gray-200 p-4 pb-6">
                     <HStack space="md">
                         <Button
                             className="flex-1 bg-orange-400 dark:bg-orange-100"
@@ -284,7 +287,7 @@ export default function QuestionDetailScreen() {
                             isDisabled={currentIndex === 0}
                         >
                             <HStack space="xs" className="items-center">
-                                <ChevronLeft size={20} />
+                                <ChevronLeft size={20}/>
                                 <ButtonText>上一题</ButtonText>
                             </HStack>
                         </Button>
@@ -297,68 +300,84 @@ export default function QuestionDetailScreen() {
                         >
                             <HStack space="xs" className="items-center">
                                 <ButtonText>下一题</ButtonText>
-                                <ChevronRight size={20} />
+                                <ChevronRight size={20}/>
                             </HStack>
                         </Button>
                     </HStack>
                 </Box>
 
+                <AnswerSheet visible={answerSheetState.showAnswerSheet} answerCard={answerCard}
+                             currentIndex={currentIndex}
+                             onCloseAnswerSheet={(visible) => {
+                                 answerSheetDispatch({
+                                     type: ANSWER_SHEET_ACTION.CLOSE_ANSWER_SHEET,
+                                     payload: {showAnswerSheet: visible}
+                                 })
+                             }}
+                             onPressQuestionOrder={(index, visible) => {
+                                 answerSheetDispatch({
+                                     type: ANSWER_SHEET_ACTION.ANSWER_SHEET_QUESTION_AVATAR_CLICKED,
+                                     payload: {showAnswerSheet: visible}
+                                 })
+                                 setCurrentIndex(index)
+                             }}/>
+
                 {/* 答题卡弹窗 */}
-                <Modal isOpen={showAnswerSheet} onClose={() => setShowAnswerSheet(false)}>
-                    <ModalBackdrop />
-                    <ModalContent className="max-h-full">
-                        <ModalHeader>
-                            <Heading size="lg">答题卡</Heading>
-                            <ModalCloseButton>
-                                <X size={24} />
-                            </ModalCloseButton>
-                        </ModalHeader>
-                        <ModalBody>
-                            <HStack className="flex-wrap gap-2 p-2">
-                                {answerCard.map((item, idx) => (
-                                    <Pressable
-                                        key={item.questionId}
-                                        onPress={() => {
-                                            setCurrentIndex(idx);
-                                            setShowAnswerSheet(false);
-                                        }}
-                                    >
-                                        <Box className="w-12 h-12 rounded justify-center items-center"
-                                             style={{
-                                                 backgroundColor: idx === currentIndex ? '#1A56DB' : item.isViewed ? '#86EFAC' : '#9CA3AF'
-                                             }}
-                                        >
-                                            <Text className="font-bold"
-                                                  style={{
-                                                      backgroundColor: idx === currentIndex ? '#FFFFFF' : '#374151',
-                                                  }}
-                                            >
-                                                {idx + 1}
-                                            </Text>
-                                        </Box>
-                                    </Pressable>
-                                ))}
-                            </HStack>
+                {/*<Modal isOpen={showAnswerSheet} onClose={() => setShowAnswerSheet(false)}>*/}
+                {/*    <ModalBackdrop />*/}
+                {/*    <ModalContent className="max-h-full">*/}
+                {/*        <ModalHeader>*/}
+                {/*            <Heading size="lg">答题卡</Heading>*/}
+                {/*            <ModalCloseButton>*/}
+                {/*                <X size={24} />*/}
+                {/*            </ModalCloseButton>*/}
+                {/*        </ModalHeader>*/}
+                {/*        <ModalBody>*/}
+                {/*            <HStack className="flex-wrap gap-2 p-2">*/}
+                {/*                {answerCard.map((item, idx) => (*/}
+                {/*                    <Pressable*/}
+                {/*                        key={item.questionId}*/}
+                {/*                        onPress={() => {*/}
+                {/*                            setCurrentIndex(idx);*/}
+                {/*                            setShowAnswerSheet(false);*/}
+                {/*                        }}*/}
+                {/*                    >*/}
+                {/*                        <Box className="w-12 h-12 rounded justify-center items-center"*/}
+                {/*                             style={{*/}
+                {/*                                 backgroundColor: idx === currentIndex ? '#1A56DB' : item.isViewed ? '#86EFAC' : '#9CA3AF'*/}
+                {/*                             }}*/}
+                {/*                        >*/}
+                {/*                            <Text className="font-bold"*/}
+                {/*                                  style={{*/}
+                {/*                                      backgroundColor: idx === currentIndex ? '#FFFFFF' : '#374151',*/}
+                {/*                                  }}*/}
+                {/*                            >*/}
+                {/*                                {idx + 1}*/}
+                {/*                            </Text>*/}
+                {/*                        </Box>*/}
+                {/*                    </Pressable>*/}
+                {/*                ))}*/}
+                {/*            </HStack>*/}
 
-                            <Divider className="my-4" />
+                {/*            <Divider className="my-4" />*/}
 
-                            <HStack className="justify-center mb-4">
-                                <HStack className="items-center" space="xs">
-                                    <Box className="w-4 h-4 rounded-s bg-green-300"/>
-                                    <Text size="sm">已浏览</Text>
-                                </HStack>
-                                <HStack space="xs" className="items-center">
-                                    <Box className="w-4 h-4 rounded-s bg-gray-700"/>
-                                    <Text size="sm">当前题</Text>
-                                </HStack>
-                                <HStack space="xs" className="items-center">
-                                    <Box className="w-4 h-4 rounded-s bg-orange-200"/>
-                                    <Text size="sm">未浏览</Text>
-                                </HStack>
-                            </HStack>
-                        </ModalBody>
-                    </ModalContent>
-                </Modal>
+                {/*            <HStack className="justify-center mb-4">*/}
+                {/*                <HStack className="items-center" space="xs">*/}
+                {/*                    <Box className="w-4 h-4 rounded-s bg-green-300"/>*/}
+                {/*                    <Text size="sm">已浏览</Text>*/}
+                {/*                </HStack>*/}
+                {/*                <HStack space="xs" className="items-center">*/}
+                {/*                    <Box className="w-4 h-4 rounded-s bg-gray-700"/>*/}
+                {/*                    <Text size="sm">当前题</Text>*/}
+                {/*                </HStack>*/}
+                {/*                <HStack space="xs" className="items-center">*/}
+                {/*                    <Box className="w-4 h-4 rounded-s bg-orange-200"/>*/}
+                {/*                    <Text size="sm">未浏览</Text>*/}
+                {/*                </HStack>*/}
+                {/*            </HStack>*/}
+                {/*        </ModalBody>*/}
+                {/*    </ModalContent>*/}
+                {/*</Modal>*/}
             </Box>
         </>
     );
