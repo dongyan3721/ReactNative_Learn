@@ -1,20 +1,20 @@
-// @ts-ignore
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    ScrollView,
-    Alert,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Link } from 'expo-router';
-// @ts-ignore
 import { categoryApi } from '@/api/category';
 import { CategoryCard } from '@/components/CategoryCard';
 import { JobCategory } from '@/types';
-import {useAuth} from "@/contexts/AuthContext";
+import { useAuth } from '@/contexts/AuthContext';
+import { Box } from '@/components/ui/box';
+import { Center } from '@/components/ui/center';
+import { VStack } from '@/components/ui/vstack';
+import { Heading } from '@/components/ui/heading';
+import { Text } from '@/components/ui/text';
+import { FormControl, FormControlLabel, FormControlLabelText } from '@/components/ui/form-control';
+import { Input, InputField } from '@/components/ui/input';
+import { Button, ButtonText } from '@/components/ui/button';
+import { Pressable } from '@/components/ui/pressable';
+import { useToast, Toast, ToastTitle } from '@/components/ui/toast';
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
@@ -23,7 +23,8 @@ export default function RegisterScreen() {
     const [categories, setCategories] = useState<JobCategory[]>([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
 
-    const {register, isLoading}  = useAuth()
+    const { register, isLoading } = useAuth();
+    const toast = useToast();
 
     useEffect(() => {
         loadCategories();
@@ -34,170 +35,198 @@ export default function RegisterScreen() {
             const response = await categoryApi.getAll();
             setCategories(response.data);
         } catch (error) {
-            Alert.alert('错误', '加载工作大类失败');
+            toast.show({
+                placement: 'top',
+                render: ({ id }) => (
+                    <Toast nativeID={id} action="error" variant="solid">
+                        <ToastTitle>加载工作大类失败</ToastTitle>
+                    </Toast>
+                ),
+            });
         }
     };
 
     const handleRegister = async () => {
         if (!email || !password || !confirmPassword) {
-            Alert.alert('错误', '请填写所有字段');
+            toast.show({
+                placement: 'top',
+                render: ({ id }) => (
+                    <Toast nativeID={id} action="error" variant="solid">
+                        <ToastTitle>请填写所有字段</ToastTitle>
+                    </Toast>
+                ),
+            });
             return;
         }
 
         if (password !== confirmPassword) {
-            Alert.alert('错误', '两次密码输入不一致');
+            toast.show({
+                placement: 'top',
+                render: ({ id }) => (
+                    <Toast nativeID={id} action="error" variant="solid">
+                        <ToastTitle>两次密码输入不一致</ToastTitle>
+                    </Toast>
+                ),
+            });
             return;
         }
 
         if (password.length < 6) {
-            Alert.alert('错误', '密码至少需要6个字符');
+            toast.show({
+                placement: 'top',
+                render: ({ id }) => (
+                    <Toast nativeID={id} action="error" variant="solid">
+                        <ToastTitle>密码至少需要6个字符</ToastTitle>
+                    </Toast>
+                ),
+            });
             return;
         }
 
         if (!selectedCategoryId) {
-            Alert.alert('错误', '请选择工作大类');
+            toast.show({
+                placement: 'top',
+                render: ({ id }) => (
+                    <Toast nativeID={id} action="error" variant="solid">
+                        <ToastTitle>请选择工作大类</ToastTitle>
+                    </Toast>
+                ),
+            });
             return;
         }
 
         try {
             await register({
-                    email,
-                    password,
-                    categoryId: selectedCategoryId,
-                }
-            )
+                email,
+                password,
+                categoryId: selectedCategoryId,
+            });
         } catch (err: any) {
-            Alert.alert('注册失败', err);
+            toast.show({
+                placement: 'top',
+                render: ({ id }) => (
+                    <Toast nativeID={id} action="error" variant="solid">
+                        <ToastTitle>{err}</ToastTitle>
+                    </Toast>
+                ),
+            });
         }
     };
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            <Text style={styles.title}>创建账号</Text>
-            <Text style={styles.subtitle}>开始你的面试准备之旅</Text>
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+        >
+            <ScrollView>
+                <Box className="flex-1 bg-white dark:bg-gray-900 px-1.5 py-8">
+                    <Center>
+                        <VStack space="xl" className="w-full max-w-xl">
+                            <VStack space="xs">
+                                <Heading size="3xl" className="text-primary-900 dark:text-primary-100">
+                                    创建账号
+                                </Heading>
+                                <Text className="text-lg text-gray-600 dark:text-gray-400">
+                                    开始你的面试准备之旅
+                                </Text>
+                            </VStack>
 
-            <TextInput
-                style={styles.input}
-                placeholder="邮箱地址"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-            />
+                            <VStack space="md" className="w-full">
+                                <FormControl isRequired>
+                                    <FormControlLabel>
+                                        <FormControlLabelText className="text-gray-700 dark:text-gray-300">
+                                            邮箱地址
+                                        </FormControlLabelText>
+                                    </FormControlLabel>
+                                    <Input variant="outline" size="lg" className="border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 bg-white dark:bg-gray-800">
+                                        <InputField
+                                            placeholder="请输入邮箱"
+                                            value={email}
+                                            onChangeText={setEmail}
+                                            keyboardType="email-address"
+                                            autoCapitalize="none"
+                                            autoCorrect={false}
+                                            className="text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                                        />
+                                    </Input>
+                                </FormControl>
 
-            <TextInput
-                style={styles.input}
-                placeholder="密码（至少6位）"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoCapitalize="none"
-            />
+                                <FormControl isRequired>
+                                    <FormControlLabel>
+                                        <FormControlLabelText className="text-gray-700 dark:text-gray-300">
+                                            密码
+                                        </FormControlLabelText>
+                                    </FormControlLabel>
+                                    <Input variant="outline" size="lg" className="border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 bg-white dark:bg-gray-800">
+                                        <InputField
+                                            placeholder="密码（至少6位）"
+                                            value={password}
+                                            onChangeText={setPassword}
+                                            type="password"
+                                            autoCapitalize="none"
+                                            className="text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                                        />
+                                    </Input>
+                                </FormControl>
 
-            <TextInput
-                style={styles.input}
-                placeholder="确认密码"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-                autoCapitalize="none"
-            />
+                                <FormControl isRequired>
+                                    <FormControlLabel>
+                                        <FormControlLabelText className="text-gray-700 dark:text-gray-300">
+                                            确认密码
+                                        </FormControlLabelText>
+                                    </FormControlLabel>
+                                    <Input variant="outline" size="lg" className="border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 bg-white dark:bg-gray-800">
+                                        <InputField
+                                            placeholder="请再次输入密码"
+                                            value={confirmPassword}
+                                            onChangeText={setConfirmPassword}
+                                            type="password"
+                                            autoCapitalize="none"
+                                            className="text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                                        />
+                                    </Input>
+                                </FormControl>
+                            </VStack>
 
-            <Text style={styles.sectionTitle}>选择工作大类 *</Text>
-            <Text style={styles.sectionSubtitle}>（注册后可以切换）</Text>
+                            <VStack space="md" className="w-full">
+                                <FormControl isRequired>
+                                  <FormControlLabel>
+                                    <FormControlLabelText className="text-gray-700 dark:text-gray-300">选择工作大类</FormControlLabelText>
+                                  </FormControlLabel>
+                                    <Text className="text-xs text-gray-500 dark:text-gray-400 mb-2">（注册后可以切换）</Text>
+                                    {categories.map((category) => (
+                                        <CategoryCard
+                                            key={category.categoryId}
+                                            category={category}
+                                            isSelected={selectedCategoryId === category.categoryId}
+                                            onPress={() => setSelectedCategoryId(category.categoryId)}
+                                        />
+                                    ))}
+                                </FormControl>
+                            </VStack>
 
-            {categories.map((category) => (
-                <CategoryCard
-                    key={category.categoryId}
-                    category={category}
-                    isSelected={selectedCategoryId === category.categoryId}
-                    onPress={() => setSelectedCategoryId(category.categoryId)}
-                />
-            ))}
+                            <Button
+                                size="lg"
+                                onPress={handleRegister}
+                                isDisabled={isLoading}
+                                className="bg-primary-700 dark:bg-primary-600 active:bg-primary-600 dark:active:bg-primary-500 disabled:bg-gray-300 dark:disabled:bg-gray-700 w-full"
+                            >
+                                <ButtonText className="text-white dark:text-gray-900 font-semibold">
+                                    {isLoading ? '注册中...' : '注册'}
+                                </ButtonText>
+                            </Button>
 
-            <TouchableOpacity
-                style={[styles.button, isLoading && styles.buttonDisabled]}
-                onPress={handleRegister}
-                disabled={isLoading}
-            >
-                <Text style={styles.buttonText}>
-                    {isLoading ? '注册中...' : '注册'}
-                </Text>
-            </TouchableOpacity>
-
-            <Link href="/(auth)/login" asChild>
-                <TouchableOpacity style={styles.linkButton}>
-                    <Text style={styles.linkText}>已有账号？返回登录</Text>
-                </TouchableOpacity>
-            </Link>
-        </ScrollView>
+                            <Link href="/(auth)/login" asChild>
+                                <Pressable className="mt-4">
+                                    <Text className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-center">
+                                        已有账号？返回登录
+                                    </Text>
+                                </Pressable>
+                            </Link>
+                        </VStack>
+                    </Center>
+                </Box>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F8F9FA',
-    },
-    content: {
-        paddingHorizontal: 24,
-        paddingVertical: 32,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: '#1a1a1a',
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#666',
-        marginBottom: 24,
-    },
-    input: {
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 16,
-        fontSize: 16,
-        marginBottom: 16,
-        borderWidth: 1,
-        borderColor: '#E0E0E0',
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#1a1a1a',
-        marginTop: 24,
-        marginBottom: 4,
-    },
-    sectionSubtitle: {
-        fontSize: 13,
-        color: '#999',
-        marginBottom: 16,
-    },
-    button: {
-        backgroundColor: '#007AFF',
-        borderRadius: 12,
-        padding: 16,
-        alignItems: 'center',
-        marginTop: 24,
-    },
-    buttonDisabled: {
-        backgroundColor: '#CCCCCC',
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 17,
-        fontWeight: '600',
-    },
-    linkButton: {
-        marginTop: 16,
-        marginBottom: 32,
-        alignItems: 'center',
-    },
-    linkText: {
-        color: '#007AFF',
-        fontSize: 15,
-    },
-});

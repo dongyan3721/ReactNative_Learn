@@ -1,11 +1,11 @@
 import React from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-} from 'react-native';
 import { Question } from '@/types';
+import { Pressable } from '@/components/ui/pressable';
+import { HStack } from '@/components/ui/hstack';
+import { VStack } from '@/components/ui/vstack';
+import { Text } from '@/components/ui/text';
+import { Badge, BadgeText } from '@/components/ui/badge';
+import { Heading } from '@/components/ui/heading';
 
 interface Props {
     question: Question;
@@ -13,133 +13,55 @@ interface Props {
     showAnswer?: boolean;
 }
 
-const DIFFICULTY_COLORS = {
-    Easy: '#4CAF50',
-    Medium: '#FF9800',
-    Hard: '#F44336',
-};
+const difficultyMap = {
+    Easy: 'success',
+    Medium: 'warning',
+    Hard: 'error',
+} as const;
 
 export const QuestionCard: React.FC<Props> = ({
-                                                  question,
-                                                  onPress,
-                                                  showAnswer = false,
-                                              }) => {
+    question,
+    onPress,
+    showAnswer = false,
+}) => {
     return (
-        <TouchableOpacity
-            style={styles.card}
-    onPress={onPress}
-    activeOpacity={0.9}
-    >
-    <View style={styles.header}>
-    <View style={[
-            styles.difficultyBadge,
-    { backgroundColor: DIFFICULTY_COLORS[question.difficulty] }
-]}>
-    <Text style={styles.difficultyText}>{question.difficulty}</Text>
-        </View>
-    {question.isFavorited && (
-        <Text style={styles.favoriteIcon}>★</Text>
-    )}
-    </View>
+        <Pressable
+            onPress={onPress}
+            className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-3 shadow-sm active:bg-gray-50 dark:active:bg-gray-700"
+        >
+            <VStack space="md">
+                <HStack className="justify-between items-center">
+                    <Badge size="sm" variant="solid" action={difficultyMap[question.difficulty] || 'muted'}>
+                        <BadgeText>{question.difficulty}</BadgeText>
+                    </Badge>
+                    {question.isFavorited && (
+                        <Text className="text-2xl text-yellow-400">★</Text>
+                    )}
+                </HStack>
 
-    <Text style={styles.title}>{question.title}</Text>
+                <Heading size="sm" className="text-gray-900 dark:text-gray-100 leading-normal">
+                    {question.title}
+                </Heading>
 
-    {question.tags && question.tags.length > 0 && (
-        <View style={styles.tagsContainer}>
-            {question.tags.map((tag) => (
-                    <View
-                        key={tag.tagId}
-                style={[
-                        styles.tag,
-        { backgroundColor: tag.tagColor || '#E0E0E0' }
-    ]}
-    >
-        <Text style={styles.tagText}>{tag.tagName}</Text>
-            </View>
-    ))}
-        </View>
-    )}
+                {question.tags && question.tags.length > 0 && (
+                    <HStack space="sm" className="flex-wrap">
+                        {question.tags.map((tag) => (
+                            <Badge key={tag.tagId} size="sm" action="muted" variant="solid" className="mb-1" style={{ backgroundColor: tag.tagColor || '#E0E0E0' }}>
+                                <BadgeText>{tag.tagName}</BadgeText>
+                            </Badge>
+                        ))}
+                    </HStack>
+                )}
 
-    <View style={styles.footer}>
-    <Text style={styles.viewCount}>浏览 {question.viewCount}</Text>
-    <Text style={styles.hint}>
-        {showAnswer ? '点击查看详情' : '点击查看答案'}
-        </Text>
-        </View>
-        </TouchableOpacity>
-);
+                <HStack className="justify-between items-center mt-2">
+                    <Text size="xs" className="text-gray-500 dark:text-gray-400">
+                        浏览 {question.viewCount}
+                    </Text>
+                    <Text size="xs" className="text-primary-600 dark:text-primary-400 font-medium">
+                        {showAnswer ? '点击查看详情' : '点击查看答案'}
+                    </Text>
+                </HStack>
+            </VStack>
+        </Pressable>
+    );
 };
-
-const styles = StyleSheet.create({
-    card: {
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 16,
-        marginHorizontal: 16,
-        marginBottom: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    difficultyBadge: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 6,
-    },
-    difficultyText: {
-        color: '#fff',
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    favoriteIcon: {
-        fontSize: 24,
-        color: '#FFD700',
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#1a1a1a',
-        lineHeight: 24,
-        marginBottom: 12,
-    },
-    tagsContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginBottom: 12,
-    },
-    tag: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 4,
-        marginRight: 8,
-        marginBottom: 8,
-    },
-    tagText: {
-        fontSize: 11,
-        color: '#fff',
-        fontWeight: '500',
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 8,
-    },
-    viewCount: {
-        fontSize: 12,
-        color: '#999',
-    },
-    hint: {
-        fontSize: 12,
-        color: '#007AFF',
-        fontWeight: '500',
-    },
-});

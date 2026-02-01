@@ -1,17 +1,14 @@
-// @ts-ignore
-import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    FlatList,
-    RefreshControl,
-    Alert,
-} from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FlatList, RefreshControl } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { questionApi } from '@/api/question';
 import { QuestionCard } from '@/components/QuestionCard';
 import { Question } from '@/types';
+import { Box } from '@/components/ui/box';
+import { Center } from '@/components/ui/center';
+import { Text } from '@/components/ui/text';
+import { Spinner } from '@/components/ui/spinner';
+import { useToast, Toast, ToastTitle } from '@/components/ui/toast';
 
 export default function QuestionListScreen() {
     const { id: topicId, topicName } = useLocalSearchParams<{
@@ -22,55 +19,62 @@ export default function QuestionListScreen() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const toast = useToast();
 
-    useEffect(() => {
-        if (topicId) {
-            loadQuestions();
-        }
-    }, [topicId]);
-
-    const loadQuestions = async () => {
+    const loadQuestions = useCallback(async () => {
+        if (!topicId) return;
         try {
             const response = await questionApi.getByTopic(Number(topicId), 1, 100);
             setQuestions(response.data.questions);
         } catch (error) {
-            Alert.alert('错误', '加载题目失败');
+            toast.show({
+                placement: 'top',
+                render: ({ id }) => (
+                    <Toast nativeID={id} action="error" variant="solid">
+                        <ToastTitle>加载题目失败</ToastTitle>
+                    </Toast>
+                ),
+            });
         } finally {
             setIsLoading(false);
             setRefreshing(false);
         }
-    };
+    }, [topicId, toast]);
+
+    useEffect(() => {
+        loadQuestions();
+    }, [loadQuestions]);
 
     const onRefresh = () => {
         setRefreshing(true);
         loadQuestions();
     };
 
-    if (isLoading) {
+    if (isLoading && !refreshing) {
         return (
-            <View style={styles.centerContainer}>
-                <Text>加载中...</Text>
-            </View>
+            <Center className="flex-1 bg-white dark:bg-gray-900">
+                <Spinner size="large" />
+            </Center>
         );
     }
 
     return (
         <>
             <Stack.Screen options={{ title: topicName || '题目列表' }} />
-            <View style={styles.container}>
+            <Box className="flex-1 bg-gray-50 dark:bg-black">
                 <FlatList
                     data={questions}
                     keyExtractor={(item) => item.questionId.toString()}
-                    contentContainerStyle={styles.listContent}
+                    contentContainerStyle={{ paddingVertical: 16 }}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                     }
                     ListHeaderComponent={
-                        <View style={styles.header}>
-                            <Text style={styles.headerText}>
+                        <Box className="px-4 pb-4">
+                            <Text className="text-sm text-gray-500 dark:text-gray-400">
                                 共 {questions.length} 道题目
                             </Text>
-                        </View>
+                        </Box>
                     }
                     renderItem={({ item, index }) => (
                         <QuestionCard
@@ -80,31 +84,13 @@ export default function QuestionListScreen() {
                             }
                         />
                     )}
+                    ListEmptyComponent={
+                        <Center className="mt-20">
+                            <Text className="text-gray-500">该考点下暂无题目</Text>
+                        </Center>
+                    }
                 />
-            </View>
+            </Box>
         </>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F8F9FA',
-    },
-    centerContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    listContent: {
-        paddingVertical: 16,
-    },
-    header: {
-        paddingHorizontal: 16,
-        paddingBottom: 12,
-    },
-    headerText: {
-        fontSize: 14,
-        color: '#666',
-    },
-});

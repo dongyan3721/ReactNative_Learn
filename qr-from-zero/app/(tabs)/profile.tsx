@@ -1,230 +1,134 @@
-// @ts-ignore
-import React from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    ScrollView,
-    Alert,
-} from 'react-native';
-import {useAuth} from "@/contexts/AuthContext";
+import React, { useState } from 'react';
+import { ScrollView } from 'react-native';
+import { useAuth } from '@/contexts/AuthContext';
+import { Box } from '@/components/ui/box';
+import { VStack } from '@/components/ui/vstack';
+import { HStack } from '@/components/ui/hstack';
+import { Center } from '@/components/ui/center';
+import { Text } from '@/components/ui/text';
+import { Heading } from '@/components/ui/heading';
+import { Button, ButtonText } from '@/components/ui/button';
+import { Pressable } from '@/components/ui/pressable';
+import { Badge, BadgeText } from '@/components/ui/badge';
+import { Modal, ModalBackdrop, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter } from '@/components/ui/modal';
+
+const MenuItem = ({ icon, text, onPress }: { icon: string; text: string; onPress?: () => void }) => (
+    <Pressable onPress={onPress} className="active:bg-gray-100 dark:active:bg-gray-800">
+        <HStack space="md" className="items-center px-4 py-4 border-b border-gray-200 dark:border-gray-700">
+            <Text className="text-2xl">{icon}</Text>
+            <Text className="flex-1 text-base text-gray-900 dark:text-gray-100">{text}</Text>
+            <Text className="text-2xl text-gray-400 dark:text-gray-500 font-light">›</Text>
+        </HStack>
+    </Pressable>
+);
+
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <VStack className="mb-4">
+        <Box className="px-4 py-3 bg-gray-50 dark:bg-gray-800">
+            <Text className="text-sm font-semibold text-gray-500 dark:text-gray-400">{title}</Text>
+        </Box>
+        <Box className="bg-white dark:bg-gray-900">
+            {children}
+        </Box>
+    </VStack>
+);
 
 export default function ProfileScreen() {
-    const {logout, user} = useAuth();
+    const { logout, user } = useAuth();
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const handleLogout = () => {
-        // 这个东西不适配web端
-        Alert.alert('退出登录', '确定要退出吗？', [
-            {text: '取消', style: 'cancel'},
-            {
-                text: '确定',
-                style: 'destructive',
-                onPress: () => logout(),
-            },
-        ]);
+        setShowLogoutModal(true);
+    };
+
+    const confirmLogout = () => {
+        setShowLogoutModal(false);
+        logout();
     };
 
     return (
-        <ScrollView style={styles.container}>
-            {/* 用户信息卡片 */}
-            <View style={styles.userCard}>
-                <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>
-                        {user?.email?.charAt(0).toUpperCase() || '?'}
-                    </Text>
-                </View>
-                <View style={styles.userInfo}>
-                    <Text style={styles.username}>
-                        {user?.username || '未设置昵称'}
-                    </Text>
-                    <Text style={styles.email}>{user?.email}</Text>
-                    {user?.isPremium && (
-                        <View style={styles.premiumBadge}>
-                            <Text style={styles.premiumText}>高级会员</Text>
-                        </View>
-                    )}
-                </View>
-            </View>
+        <>
+            <ScrollView className="flex-1 bg-gray-100 dark:bg-black">
+                {/* User Info Card */}
+                <Box className="bg-white dark:bg-gray-900 p-5 mb-4">
+                    <HStack space="md" className="items-center">
+                        <Center className="w-16 h-16 rounded-full bg-primary-500">
+                            <Heading size="2xl" className="text-white">
+                                {user?.email?.charAt(0).toUpperCase() || '?'}
+                            </Heading>
+                        </Center>
+                        <VStack>
+                            <Heading size="lg" className="text-gray-900 dark:text-gray-100">
+                                {user?.username || '未设置昵称'}
+                            </Heading>
+                            <Text className="text-gray-600 dark:text-gray-400">{user?.email}</Text>
+                            {user?.isPremium && (
+                                <Badge size="sm" action="warning" variant="solid" className="mt-2 self-start">
+                                    <BadgeText>高级会员</BadgeText>
+                                </Badge>
+                            )}
+                        </VStack>
+                    </HStack>
+                </Box>
 
-            {/* 功能列表 */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>学习</Text>
+                <Section title="学习">
+                    <MenuItem icon="📊" text="学习统计" />
+                    <MenuItem icon="📝" text="学习记录" />
+                    <MenuItem icon="🏆" text="成就徽章" />
+                </Section>
 
-                <TouchableOpacity style={styles.menuItem}>
-                    <Text style={styles.menuIcon}>📊</Text>
-                    <Text style={styles.menuText}>学习统计</Text>
-                    <Text style={styles.menuArrow}>›</Text>
-                </TouchableOpacity>
+                <Section title="设置">
+                    <MenuItem icon="🎯" text="切换工作大类" />
+                    <MenuItem icon="👤" text="编辑资料" />
+                    <MenuItem icon="⚙️" text="通用设置" />
+                </Section>
 
-                <TouchableOpacity style={styles.menuItem}>
-                    <Text style={styles.menuIcon}>📝</Text>
-                    <Text style={styles.menuText}>学习记录</Text>
-                    <Text style={styles.menuArrow}>›</Text>
-                </TouchableOpacity>
+                <Section title="其他">
+                    <MenuItem icon="❓" text="帮助与反馈" />
+                    <MenuItem icon="ℹ️" text="关于我们" />
+                </Section>
 
-                <TouchableOpacity style={styles.menuItem}>
-                    <Text style={styles.menuIcon}>🏆</Text>
-                    <Text style={styles.menuText}>成就徽章</Text>
-                    <Text style={styles.menuArrow}>›</Text>
-                </TouchableOpacity>
-            </View>
+                {/* Logout Button */}
+                <Box className="px-4 py-4">
+                     <Button
+                        variant="solid"
+                        action="negative"
+                        onPress={handleLogout}
+                        >
+                        <ButtonText>退出登录</ButtonText>
+                    </Button>
+                </Box>
 
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>设置</Text>
 
-                <TouchableOpacity style={styles.menuItem}>
-                    <Text style={styles.menuIcon}>🎯</Text>
-                    <Text style={styles.menuText}>切换工作大类</Text>
-                    <Text style={styles.menuArrow}>›</Text>
-                </TouchableOpacity>
+                {/* Footer */}
+                <Center className="py-5">
+                    <Text className="text-xs text-gray-400 dark:text-gray-600">Version 1.0.0</Text>
+                </Center>
+            </ScrollView>
 
-                <TouchableOpacity style={styles.menuItem}>
-                    <Text style={styles.menuIcon}>👤</Text>
-                    <Text style={styles.menuText}>编辑资料</Text>
-                    <Text style={styles.menuArrow}>›</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.menuItem}>
-                    <Text style={styles.menuIcon}>⚙️</Text>
-                    <Text style={styles.menuText}>通用设置</Text>
-                    <Text style={styles.menuArrow}>›</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>其他</Text>
-
-                <TouchableOpacity style={styles.menuItem}>
-                    <Text style={styles.menuIcon}>❓</Text>
-                    <Text style={styles.menuText}>帮助与反馈</Text>
-                    <Text style={styles.menuArrow}>›</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.menuItem}>
-                    <Text style={styles.menuIcon}>ℹ️</Text>
-                    <Text style={styles.menuText}>关于我们</Text>
-                    <Text style={styles.menuArrow}>›</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* 退出登录按钮 */}
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                <Text style={styles.logoutText}>退出登录</Text>
-            </TouchableOpacity>
-
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>Version 1.0.0</Text>
-            </View>
-        </ScrollView>
+            {/* Logout Confirmation Modal */}
+            <Modal isOpen={showLogoutModal} onClose={() => setShowLogoutModal(false)}>
+                <ModalBackdrop />
+                <ModalContent>
+                    <ModalHeader>
+                        <Heading>退出登录</Heading>
+                        <ModalCloseButton>
+                           <Text>X</Text>
+                        </ModalCloseButton>
+                    </ModalHeader>
+                    <ModalBody>
+                        <Text>确定要退出吗？</Text>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button variant="outline" size="sm" action="secondary" className="mr-3" onPress={() => setShowLogoutModal(false)}>
+                            <ButtonText>取消</ButtonText>
+                        </Button>
+                        <Button size="sm" action="negative" onPress={confirmLogout}>
+                            <ButtonText>确定</ButtonText>
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        </>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F8F9FA',
-    },
-    userCard: {
-        backgroundColor: '#fff',
-        flexDirection: 'row',
-        padding: 20,
-        marginBottom: 16,
-        alignItems: 'center',
-    },
-    avatar: {
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        backgroundColor: '#007AFF',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 16,
-    },
-    avatarText: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: '#fff',
-    },
-    userInfo: {
-        flex: 1,
-    },
-    username: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#1a1a1a',
-        marginBottom: 4,
-    },
-    email: {
-        fontSize: 14,
-        color: '#666',
-    },
-    premiumBadge: {
-        backgroundColor: '#FFD700',
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
-        marginTop: 8,
-        alignSelf: 'flex-start',
-    },
-    premiumText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#1a1a1a',
-    },
-    section: {
-        backgroundColor: '#fff',
-        marginBottom: 16,
-    },
-    sectionTitle: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#999',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: '#F8F9FA',
-    },
-    menuItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#F0F0F0',
-    },
-    menuIcon: {
-        fontSize: 24,
-        marginRight: 12,
-    },
-    menuText: {
-        flex: 1,
-        fontSize: 16,
-        color: '#1a1a1a',
-    },
-    menuArrow: {
-        fontSize: 24,
-        color: '#ccc',
-        fontWeight: '300',
-    },
-    logoutButton: {
-        backgroundColor: '#fff',
-        padding: 16,
-        marginHorizontal: 16,
-        marginVertical: 16,
-        borderRadius: 12,
-        alignItems: 'center',
-    },
-    logoutText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#FF3B30',
-    },
-    footer: {
-        paddingVertical: 20,
-        alignItems: 'center',
-    },
-    footerText: {
-        fontSize: 12,
-        color: '#999',
-    },
-});

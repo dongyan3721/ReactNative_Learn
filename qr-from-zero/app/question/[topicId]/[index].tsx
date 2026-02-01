@@ -246,7 +246,7 @@ export default function QuestionDetailScreen() {
                                 onPress={() => setShowAnswer(true)}
                                 disabled={showAnswer}
                             >
-                                <Box className="bg-white dark:bg-gray-900 p-4 mb-2">
+                                <Box className="bg-white dark:bg-gray-900 mb-2">
                                     <MarkdownViewer content={currentQuestion.contentMd}/>
 
                                     {!showAnswer && (
@@ -267,7 +267,7 @@ export default function QuestionDetailScreen() {
                                             答案解析
                                         </Text>
                                     </Box>
-                                    <Box className="p-4">
+                                    <Box>
                                         <MarkdownViewer content={currentQuestion.answerMd}/>
                                     </Box>
                                 </Box>
