@@ -4,23 +4,26 @@ import { View, ViewProps } from 'react-native';
 import { OverlayProvider } from '@gluestack-ui/core/overlay/creator';
 import { ToastProvider } from '@gluestack-ui/core/toast/creator';
 import { useColorScheme } from 'nativewind';
+import {useSettings} from "@/contexts/SettingsContext";
 
-export type ModeType = 'light' | 'dark' | 'system';
+// export type ModeType = 'light' | 'dark' | 'system';
 
 export function GluestackUIProvider({
-  mode = 'light',
+  // mode = 'light',
   ...props
 }: {
-  mode?: ModeType;
+  // mode?: ModeType;
   children?: React.ReactNode;
   style?: ViewProps['style'];
 }) {
   const { colorScheme, setColorScheme } = useColorScheme();
 
+  const {settings} = useSettings();
+
   useEffect(() => {
-    setColorScheme(mode);
+    setColorScheme(settings.theme);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+  }, []);
 
   return (
     <View
