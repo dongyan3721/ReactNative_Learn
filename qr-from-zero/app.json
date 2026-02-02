@@ -1,11 +1,12 @@
 {
   "expo": {
-    "name": "expo-auth-demo",
-    "slug": "expo-auth-demo",
+    "name": "interview-qk",
+    "slug": "interview-qk",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -16,20 +17,20 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.expoauthdemo"
+      "bundleIdentifier": "cn.yan.interview"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.yourcompany.expoauthdemo"
+      "package": "cn.yan.interview"
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "scheme": "expo-auth-demo",
+    "scheme": "interview-qk",
     "plugins": [
       "expo-router"
     ]

@@ -1,6 +1,5 @@
 import React, {ReactNode, useState} from 'react';
 import {
-  Text,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
@@ -22,6 +21,7 @@ import {Button, ButtonText} from "@/components/ui/button";
 import {Pressable} from "@/components/ui/pressable";
 import {Heading} from "@/components/ui/heading";
 import {HStack} from "@/components/ui/hstack";
+import {Text} from "@/components/ui/text";
 
 
 

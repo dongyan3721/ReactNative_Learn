@@ -9,8 +9,11 @@ import { Center } from '@/components/ui/center';
 import { Text } from '@/components/ui/text';
 import { Spinner } from '@/components/ui/spinner';
 import { useToast, Toast, ToastTitle } from '@/components/ui/toast';
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 export default function TopicListScreen() {
+
+    const insets = useSafeAreaInsets();
     const { id: positionId } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
     const [topics, setTopics] = useState<ExamTopic[]>([]);
@@ -56,39 +59,36 @@ export default function TopicListScreen() {
     }
 
     return (
-        <>
-            <Stack.Screen options={{ title: '选择考点' }} />
-            <Box className="flex-1 bg-gray-50 dark:bg-black">
-                <FlatList
-                    data={topics}
-                    keyExtractor={(item) => item.topicId.toString()}
-                    contentContainerStyle={{ paddingVertical: 16 }}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                    }
-                    ListHeaderComponent={
-                        <Text className="text-sm text-gray-500 dark:text-gray-400 px-4 pb-4">
-                            选择考点开始刷题
-                        </Text>
-                    }
-                    renderItem={({ item }) => (
-                        <TopicItem
-                            topic={item}
-                            onPress={() =>
-                                router.push({
-                                    pathname: `/topic/${item.topicId}`,
-                                    params: { topicName: item.topicName },
-                                })
-                            }
-                        />
-                    )}
-                    ListEmptyComponent={
-                        <Center className="mt-20">
-                            <Text className="text-gray-500">该职位下暂无考点</Text>
-                        </Center>
-                    }
-                />
-            </Box>
-        </>
+        <Box style={{paddingTop: insets.top}} className="flex-1 bg-gray-50 dark:bg-black">
+            <FlatList
+                data={topics}
+                keyExtractor={(item) => item.topicId.toString()}
+                contentContainerStyle={{ paddingVertical: 16 }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+                ListHeaderComponent={
+                    <Text className="text-sm text-gray-500 dark:text-gray-400 px-4 pb-4">
+                        选择考点开始刷题
+                    </Text>
+                }
+                renderItem={({ item }) => (
+                    <TopicItem
+                        topic={item}
+                        onPress={() =>
+                            router.push({
+                                pathname: `/topic/${item.topicId}`,
+                                params: { topicName: item.topicName },
+                            })
+                        }
+                    />
+                )}
+                ListEmptyComponent={
+                    <Center className="mt-20">
+                        <Text className="text-gray-500">该职位下暂无考点</Text>
+                    </Center>
+                }
+            />
+        </Box>
     );
 }

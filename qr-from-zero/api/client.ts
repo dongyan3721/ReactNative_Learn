@@ -4,7 +4,7 @@ import {HttpCode} from "@/api/httpcode";
 import {useRouter} from "expo-router";
 import {Alert} from "react-native";
 
-const API_BASE_URL = "http://192.168.2.24:8080/api/v1"
+const API_BASE_URL = "http://192.168.2.66:8080/api/v1"
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,

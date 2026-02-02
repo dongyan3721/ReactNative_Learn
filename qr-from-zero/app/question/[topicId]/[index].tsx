@@ -29,7 +29,7 @@ const DIFFICULTY_COLORS = {
     Easy: 'success',
     Medium: 'warning',
     Hard: 'error',
-};
+} as const;
 
 export default function QuestionDetailScreen() {
     const {topicId, index} = useLocalSearchParams<{
@@ -150,13 +150,19 @@ export default function QuestionDetailScreen() {
         setTimeout(callback, 150);
     };
 
-    const panGesture = Gesture.Pan().onEnd((event) => {
-        if (event.translationX > 100) {
-            handlePrevious();
-        } else if (event.translationX < -100) {
-            handleNext();
-        }
-    });
+    const panGesture = Gesture.Pan()
+        // 只有横向位移超过阈值才激活（避免竖向滚动被抢）
+        .activeOffsetX([-20, 20])
+        // 竖向位移超过阈值就失败，让 ScrollView 接管
+        .failOffsetY([-10, 10])
+        .onEnd((event) => {
+            if (event.translationX > 100) {
+                console.log(111)
+                handlePrevious();
+            } else if (event.translationX < -100) {
+                handleNext();
+            }
+        });
 
     if (isLoading) {
         return (
@@ -278,11 +284,11 @@ export default function QuestionDetailScreen() {
 
                 {/* 底部导航栏 */}
                 <Box
-                    className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t-2 border-t-gray-800 dark:border-t-gray-200 p-4 pb-6">
+                    className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 p-4 pb-6">
                     <HStack space="md">
                         <Button
                             className="flex-1 bg-orange-400 dark:bg-orange-100"
-                            variant="outline"
+                            variant="solid"
                             onPress={handlePrevious}
                             isDisabled={currentIndex === 0}
                         >
@@ -321,63 +327,6 @@ export default function QuestionDetailScreen() {
                                  })
                                  setCurrentIndex(index)
                              }}/>
-
-                {/* 答题卡弹窗 */}
-                {/*<Modal isOpen={showAnswerSheet} onClose={() => setShowAnswerSheet(false)}>*/}
-                {/*    <ModalBackdrop />*/}
-                {/*    <ModalContent className="max-h-full">*/}
-                {/*        <ModalHeader>*/}
-                {/*            <Heading size="lg">答题卡</Heading>*/}
-                {/*            <ModalCloseButton>*/}
-                {/*                <X size={24} />*/}
-                {/*            </ModalCloseButton>*/}
-                {/*        </ModalHeader>*/}
-                {/*        <ModalBody>*/}
-                {/*            <HStack className="flex-wrap gap-2 p-2">*/}
-                {/*                {answerCard.map((item, idx) => (*/}
-                {/*                    <Pressable*/}
-                {/*                        key={item.questionId}*/}
-                {/*                        onPress={() => {*/}
-                {/*                            setCurrentIndex(idx);*/}
-                {/*                            setShowAnswerSheet(false);*/}
-                {/*                        }}*/}
-                {/*                    >*/}
-                {/*                        <Box className="w-12 h-12 rounded justify-center items-center"*/}
-                {/*                             style={{*/}
-                {/*                                 backgroundColor: idx === currentIndex ? '#1A56DB' : item.isViewed ? '#86EFAC' : '#9CA3AF'*/}
-                {/*                             }}*/}
-                {/*                        >*/}
-                {/*                            <Text className="font-bold"*/}
-                {/*                                  style={{*/}
-                {/*                                      backgroundColor: idx === currentIndex ? '#FFFFFF' : '#374151',*/}
-                {/*                                  }}*/}
-                {/*                            >*/}
-                {/*                                {idx + 1}*/}
-                {/*                            </Text>*/}
-                {/*                        </Box>*/}
-                {/*                    </Pressable>*/}
-                {/*                ))}*/}
-                {/*            </HStack>*/}
-
-                {/*            <Divider className="my-4" />*/}
-
-                {/*            <HStack className="justify-center mb-4">*/}
-                {/*                <HStack className="items-center" space="xs">*/}
-                {/*                    <Box className="w-4 h-4 rounded-s bg-green-300"/>*/}
-                {/*                    <Text size="sm">已浏览</Text>*/}
-                {/*                </HStack>*/}
-                {/*                <HStack space="xs" className="items-center">*/}
-                {/*                    <Box className="w-4 h-4 rounded-s bg-gray-700"/>*/}
-                {/*                    <Text size="sm">当前题</Text>*/}
-                {/*                </HStack>*/}
-                {/*                <HStack space="xs" className="items-center">*/}
-                {/*                    <Box className="w-4 h-4 rounded-s bg-orange-200"/>*/}
-                {/*                    <Text size="sm">未浏览</Text>*/}
-                {/*                </HStack>*/}
-                {/*            </HStack>*/}
-                {/*        </ModalBody>*/}
-                {/*    </ModalContent>*/}
-                {/*</Modal>*/}
             </Box>
         </>
     );

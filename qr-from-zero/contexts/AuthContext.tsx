@@ -3,6 +3,7 @@ import {useRouter, useSegments} from 'expo-router';
 import authStorage from '@/utils/auth';
 import {authApi, LoginRequest, RegisterRequest} from "@/api/auth";
 import {User} from "@/types";
+import {Alert} from "react-native";
 
 interface AuthContextType {
   token: string | null;
@@ -78,13 +79,19 @@ export function AuthProvider({children}: AuthProviderProps) {
 
   const login = async (data: LoginRequest) => {
     setIsLoading(true);
-    const res = await authApi.login(data);
-    setToken(res.data.token);
-    setUser(res.data.user);
-    await authStorage.setToken(res.data.token);
-    await authStorage.setUser(res.data.user);
-    setIsLoading(false);
-    router.replace('/(tabs)');
+    try {
+      const res = await authApi.login(data);
+      setToken(res.data.token);
+      setUser(res.data.user);
+      await authStorage.setToken(res.data.token);
+      await authStorage.setUser(res.data.user);
+      router.replace('/(tabs)');
+    }catch (error) {
+      // @ts-ignore
+      Alert.alert('错误', error)
+    }finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = async () => {

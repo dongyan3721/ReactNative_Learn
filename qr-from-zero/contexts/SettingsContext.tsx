@@ -5,7 +5,6 @@
 // 个人设置里面给一个开关是否要跟随系统
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 定义偏好设置的数据结构
@@ -18,13 +17,11 @@ interface UserSettings {
 interface SettingsContextType {
     settings: UserSettings;
     updateSetting: <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => void;
-    resolvedTheme: 'light' | 'dark'; // 最终生效的皮肤
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider = ({ children }: { children: React.ReactNode }) => {
-    const systemColorScheme = useColorScheme();
     const [settings, setSettings] = useState<UserSettings>({
         theme: 'system',
         fontSize: 'medium',
@@ -48,12 +45,10 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
     };
 
     // 判定当前真正该显示的颜色模式
-    const resolvedTheme = settings.theme === 'system'
-        ? (systemColorScheme === 'dark' ? 'dark' : 'light')
-        : settings.theme;
+
 
     return (
-        <SettingsContext.Provider value={{ settings, updateSetting, resolvedTheme }}>
+        <SettingsContext.Provider value={{ settings, updateSetting }}>
             {children}
         </SettingsContext.Provider>
     );

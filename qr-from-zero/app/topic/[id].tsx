@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FlatList, RefreshControl } from 'react-native';
+import {FlatList, RefreshControl, ScrollView} from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { questionApi } from '@/api/question';
 import { QuestionCard } from '@/components/QuestionCard';
@@ -9,8 +9,10 @@ import { Center } from '@/components/ui/center';
 import { Text } from '@/components/ui/text';
 import { Spinner } from '@/components/ui/spinner';
 import { useToast, Toast, ToastTitle } from '@/components/ui/toast';
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 export default function QuestionListScreen() {
+    const insets = useSafeAreaInsets();
     const { id: topicId, topicName } = useLocalSearchParams<{
         id: string;
         topicName: string;
@@ -59,38 +61,35 @@ export default function QuestionListScreen() {
     }
 
     return (
-        <>
-            <Stack.Screen options={{ title: topicName || '题目列表' }} />
-            <Box className="flex-1 bg-gray-50 dark:bg-black">
-                <FlatList
-                    data={questions}
-                    keyExtractor={(item) => item.questionId.toString()}
-                    contentContainerStyle={{ paddingVertical: 16 }}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                    }
-                    ListHeaderComponent={
-                        <Box className="px-4 pb-4">
-                            <Text className="text-sm text-gray-500 dark:text-gray-400">
-                                共 {questions.length} 道题目
-                            </Text>
-                        </Box>
-                    }
-                    renderItem={({ item, index }) => (
-                        <QuestionCard
-                            question={item}
-                            onPress={() =>
-                                router.push(`/question/${topicId}/${index}`)
-                            }
-                        />
-                    )}
-                    ListEmptyComponent={
-                        <Center className="mt-20">
-                            <Text className="text-gray-500">该考点下暂无题目</Text>
-                        </Center>
-                    }
-                />
-            </Box>
-        </>
+        <Box style={{paddingTop: insets.top, paddingBottom: insets.bottom}} className="flex-1 bg-gray-50 dark:bg-black">
+            <FlatList
+                data={questions}
+                keyExtractor={(item) => item.questionId.toString()}
+                contentContainerStyle={{ paddingVertical: 16 }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+                ListHeaderComponent={
+                    <Box className="px-4 pb-4">
+                        <Text className="text-sm text-gray-500 dark:text-gray-400">
+                            共 {questions.length} 道题目
+                        </Text>
+                    </Box>
+                }
+                renderItem={({ item, index }) => (
+                    <QuestionCard
+                        question={item}
+                        onPress={() =>
+                            router.push(`/question/${topicId}/${index}`)
+                        }
+                    />
+                )}
+                ListEmptyComponent={
+                    <Center className="mt-20">
+                        <Text className="text-gray-500">该考点下暂无题目</Text>
+                    </Center>
+                }
+            />
+        </Box>
     );
 }

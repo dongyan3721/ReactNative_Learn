@@ -6,6 +6,8 @@ import {GestureHandlerRootView} from "react-native-gesture-handler";
 import {GluestackUIProvider} from '@/components/ui/gluestack-ui-provider';
 import '@/global.css';
 import {SettingsProvider} from "@/contexts/SettingsContext";
+import {StatusBar} from "expo-status-bar";
+
 
 // SplashScreen.preventAutoHideAsync()
 
@@ -18,6 +20,7 @@ export default function RootLayout() {
                 <SettingsProvider>
                     <AuthProvider>
                         <GluestackUIProvider>
+                            <StatusBar style="auto" />
                             <Slot/>
                         </GluestackUIProvider>
                     </AuthProvider>
